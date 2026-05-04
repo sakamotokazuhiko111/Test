@@ -1,0 +1,115 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h3 mb-0"><i class="bi bi-person-lines-fill me-2 text-primary"></i>社員一覧</h1>
+  <div class="d-flex gap-2">
+    <a href="/employees/export.csv?name=<%= encodeURIComponent(filters.name) %>&departmentId=<%= filters.departmentId %>&position=<%= encodeURIComponent(filters.position) %>&status=<%= filters.status %>"
+       class="btn btn-success btn-sm">
+      <i class="bi bi-file-earmark-spreadsheet me-1"></i>CSVエクスポート
+    </a>
+    <a href="/employees/new" class="btn btn-primary btn-sm">
+      <i class="bi bi-plus-circle me-1"></i>新規登録
+    </a>
+  </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+  <div class="card-header bg-light fw-semibold">
+    <i class="bi bi-search me-1"></i>絞り込み
+  </div>
+  <div class="card-body">
+    <form method="GET" action="/employees" class="row g-2">
+      <div class="col-md-3">
+        <input type="text" name="name" class="form-control form-control-sm" placeholder="氏名" value="<%= filters.name %>">
+      </div>
+      <div class="col-md-3">
+        <select name="departmentId" class="form-select form-select-sm">
+          <option value="">すべての部署</option>
+          <% departments.forEach(d => { %>
+          <option value="<%= d.id %>" <%= filters.departmentId == d.id ? 'selected' : '' %>><%= d.name %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <input type="text" name="position" class="form-control form-control-sm" placeholder="役職" value="<%= filters.position %>">
+      </div>
+      <div class="col-md-2">
+        <select name="status" class="form-select form-select-sm">
+          <option value="">すべて</option>
+          <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>>在職</option>
+          <option value="inactive" <%= filters.status === 'inactive' ? 'selected' : '' %>>退職</option>
+        </select>
+      </div>
+      <div class="col-md-1">
+        <button type="submit" class="btn btn-primary btn-sm w-100">検索</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+  <span class="text-muted small">
+    <% if (filters.name || filters.departmentId || filters.position || filters.status) { %>
+      検索結果: <strong><%= employees.length %></strong> 件
+      <a href="/employees" class="ms-2 small">絞り込みを解除</a>
+    <% } else { %>
+      全 <strong><%= employees.length %></strong> 名
+    <% } %>
+  </span>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>ID</th>
+          <th>氏名</th>
+          <th>部署</th>
+          <th>役職</th>
+          <th>入社日</th>
+          <th>ステータス</th>
+          <th class="text-end">操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (employees.length === 0) { %>
+        <tr>
+          <td colspan="7" class="text-center py-5 text-muted">
+            <i class="bi bi-inbox display-6 d-block mb-2"></i>
+            該当する社員が見つかりません
+          </td>
+        </tr>
+        <% } %>
+        <% employees.forEach(emp => { %>
+        <tr class="cursor-pointer" onclick="location.href='/employees/<%= emp.id %>'">
+          <td class="text-muted">#<%= emp.id %></td>
+          <td>
+            <div class="fw-semibold"><%= emp.name %></div>
+            <% if (emp.name_kana) { %><small class="text-muted"><%= emp.name_kana %></small><% } %>
+          </td>
+          <td><%= emp.department_name || '<span class="text-muted">-</span>' %></td>
+          <td><%= emp.position || '<span class="text-muted">-</span>' %></td>
+          <td class="text-muted small"><%= emp.hire_date || '-' %></td>
+          <td>
+            <% if (emp.status === 'active') { %>
+            <span class="badge bg-success">在職</span>
+            <% } else { %>
+            <span class="badge bg-secondary">退職</span>
+            <% } %>
+          </td>
+          <td class="text-end" onclick="event.stopPropagation()">
+            <a href="/employees/<%= emp.id %>/edit" class="btn btn-sm btn-outline-primary me-1">
+              <i class="bi bi-pencil"></i>
+            </a>
+            <form method="POST" action="/employees/<%= emp.id %>?_method=DELETE" class="d-inline"
+                  data-confirm="「<%= emp.name %>」を削除しますか？">
+              <button type="submit" class="btn btn-sm btn-outline-danger">
+                <i class="bi bi-trash"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,71 @@
+<div class="d-flex align-items-center mb-4">
+  <a href="/employees/<%= employee.id %>" class="btn btn-outline-secondary btn-sm me-3">
+    <i class="bi bi-arrow-left"></i>
+  </a>
+  <h1 class="h3 mb-0">社員編集</h1>
+</div>
+
+<div class="card shadow-sm" style="max-width: 700px;">
+  <div class="card-body">
+    <% if (errors.length > 0) { %>
+    <div class="alert alert-danger">
+      <% errors.forEach(e => { %><div><i class="bi bi-exclamation-circle me-1"></i><%= e %></div><% }) %>
+    </div>
+    <% } %>
+
+    <form method="POST" action="/employees/<%= employee.id %>?_method=PUT">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">氏名 <span class="text-danger">*</span></label>
+          <input type="text" name="name" class="form-control" value="<%= employee.name %>" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">フリガナ</label>
+          <input type="text" name="name_kana" class="form-control" value="<%= employee.name_kana || '' %>">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">部署</label>
+          <select name="department_id" class="form-select">
+            <option value="">選択してください</option>
+            <% departments.forEach(d => { %>
+            <option value="<%= d.id %>" <%= employee.department_id == d.id ? 'selected' : '' %>><%= d.name %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">役職</label>
+          <input type="text" name="position" class="form-control" value="<%= employee.position || '' %>">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">メールアドレス</label>
+          <input type="email" name="email" class="form-control" value="<%= employee.email || '' %>">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">電話番号</label>
+          <input type="tel" name="phone" class="form-control" value="<%= employee.phone || '' %>">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">入社日</label>
+          <input type="date" name="hire_date" class="form-control" value="<%= employee.hire_date || '' %>">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">ステータス</label>
+          <select name="status" class="form-select">
+            <option value="active" <%= employee.status === 'active' ? 'selected' : '' %>>在職</option>
+            <option value="inactive" <%= employee.status === 'inactive' ? 'selected' : '' %>>退職</option>
+          </select>
+        </div>
+        <div class="col-12">
+          <label class="form-label fw-semibold">備考</label>
+          <textarea name="notes" class="form-control" rows="3"><%= employee.notes || '' %></textarea>
+        </div>
+        <div class="col-12 d-flex gap-2">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-circle me-1"></i>更新
+          </button>
+          <a href="/employees/<%= employee.id %>" class="btn btn-outline-secondary">キャンセル</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
