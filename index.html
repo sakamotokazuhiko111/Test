@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>案件・損益管理システム</title>
+  <title>営業・案件・損益管理システム</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,17 +11,19 @@
 <!-- ===== Header ===== -->
 <header class="header">
   <div class="header-inner">
-    <h1 class="header-title">案件・損益管理システム</h1>
-    <div class="header-actions">
-      <button class="btn btn-primary" id="btnHeaderAdd">＋ 新規登録</button>
-    </div>
+    <h1 class="header-title">営業・案件・損益管理システム</h1>
+    <button class="btn btn-primary" id="btnHeaderAdd" hidden>＋ 新規登録</button>
   </div>
   <nav class="nav">
     <button class="nav-tab active" data-tab="dashboard">ダッシュボード</button>
+    <button class="nav-tab" data-tab="customers">顧客管理</button>
+    <button class="nav-tab" data-tab="prospects">候補案件</button>
+    <button class="nav-tab" data-tab="orders">受注管理</button>
     <button class="nav-tab" data-tab="cases">案件管理</button>
     <button class="nav-tab" data-tab="revenue">売上管理</button>
     <button class="nav-tab" data-tab="cost">原価管理</button>
     <button class="nav-tab" data-tab="pnl">損益管理</button>
+    <button class="nav-tab" data-tab="targets">年度目標</button>
     <button class="nav-tab" data-tab="dept">部署管理</button>
   </nav>
 </header>
@@ -31,24 +33,81 @@
   <!-- ===== DASHBOARD ===== -->
   <section class="tab-content" id="tab-dashboard">
     <div class="kpi-grid" id="kpiGrid"></div>
-    <div class="dash-grid">
-      <div class="card">
-        <div class="card-header"><h3>部署別損益サマリー</h3></div>
-        <div class="card-body" id="dashDeptPnl"></div>
-      </div>
-      <div class="card">
-        <div class="card-header"><h3>案件別粗利 TOP5</h3></div>
-        <div class="card-body" id="dashTopProjects"></div>
-      </div>
-      <div class="card">
-        <div class="card-header"><h3>最近の売上登録</h3></div>
-        <div class="card-body" id="dashRecentRevenue"></div>
-      </div>
-      <div class="card">
-        <div class="card-header"><h3>最近の原価登録</h3></div>
-        <div class="card-body" id="dashRecentCost"></div>
-      </div>
+    <div class="dash-grid" id="dashGrid"></div>
+  </section>
+
+  <!-- ===== CUSTOMERS ===== -->
+  <section class="tab-content" id="tab-customers" hidden>
+    <div class="toolbar">
+      <input class="input search-input" type="text" id="custSearch" placeholder="顧客名・担当者で検索…">
+      <select class="input" id="custFiltIndustry">
+        <option value="">すべての業種</option>
+        <option>IT</option><option>製造</option><option>金融</option>
+        <option>流通</option><option>建設</option><option>サービス</option><option>その他</option>
+      </select>
+      <button class="btn btn-ghost" id="custResetBtn">リセット</button>
     </div>
+    <div class="table-wrapper">
+      <table class="table">
+        <thead><tr>
+          <th>No.</th><th>顧客名</th><th>業種</th><th>担当者</th>
+          <th>電話</th><th>メール</th><th>候補件数</th><th>受注件数</th><th>操作</th>
+        </tr></thead>
+        <tbody id="custTableBody"></tbody>
+      </table>
+      <div class="empty-state" id="custEmpty" hidden>顧客が登録されていません</div>
+    </div>
+    <div class="table-footer" id="custFooter"></div>
+  </section>
+
+  <!-- ===== PROSPECTS ===== -->
+  <section class="tab-content" id="tab-prospects" hidden>
+    <div class="pipeline-grid" id="pipelineGrid"></div>
+    <div class="toolbar" style="margin-top:16px">
+      <select class="input" id="prospFiltDept"><option value="">すべての部署</option></select>
+      <select class="input" id="prospFiltStage">
+        <option value="">すべてのステージ</option>
+        <option>リード</option><option>提案</option><option>見積</option>
+        <option>交渉</option><option>クロージング</option><option>受注済</option><option>失注</option>
+      </select>
+      <select class="input" id="prospFiltAssignee"><option value="">すべての担当者</option></select>
+      <button class="btn btn-ghost" id="prospResetBtn">リセット</button>
+    </div>
+    <div class="table-wrapper">
+      <table class="table">
+        <thead><tr>
+          <th>顧客名</th><th>案件名</th><th>部署</th><th>概算金額</th>
+          <th>確度</th><th>ステージ</th><th>担当者</th><th>見込日</th><th>操作</th>
+        </tr></thead>
+        <tbody id="prospTableBody"></tbody>
+      </table>
+      <div class="empty-state" id="prospEmpty" hidden>候補案件が登録されていません</div>
+    </div>
+    <div class="table-footer" id="prospFooter"></div>
+  </section>
+
+  <!-- ===== ORDERS ===== -->
+  <section class="tab-content" id="tab-orders" hidden>
+    <div class="kpi-grid" id="orderKpiGrid"></div>
+    <div class="toolbar" style="margin-top:16px">
+      <select class="input" id="orderFiltDept"><option value="">すべての部署</option></select>
+      <input class="input" type="month" id="orderFiltMonth" style="max-width:180px">
+      <select class="input" id="orderFiltStatus">
+        <option value="">すべて</option><option value="pending">未案件化</option><option value="done">案件化済</option>
+      </select>
+      <button class="btn btn-ghost" id="orderResetBtn">リセット</button>
+    </div>
+    <div class="table-wrapper">
+      <table class="table">
+        <thead><tr>
+          <th>受注日</th><th>顧客名</th><th>案件名</th><th>部署</th>
+          <th>受注金額</th><th>納期</th><th>担当者</th><th>案件</th><th>操作</th>
+        </tr></thead>
+        <tbody id="orderTableBody"></tbody>
+      </table>
+      <div class="empty-state" id="orderEmpty" hidden>受注データが登録されていません</div>
+    </div>
+    <div class="table-footer" id="orderFooter"></div>
   </section>
 
   <!-- ===== CASES ===== -->
@@ -62,8 +121,7 @@
         <option>完了</option><option>保留</option><option>失注</option>
       </select>
       <select class="input" id="caseFiltPriority">
-        <option value="">すべての優先度</option>
-        <option>高</option><option>中</option><option>低</option>
+        <option value="">すべての優先度</option><option>高</option><option>中</option><option>低</option>
       </select>
       <button class="btn btn-ghost" id="caseResetBtn">リセット</button>
     </div>
@@ -94,7 +152,7 @@
     <div class="toolbar">
       <select class="input" id="revFiltDept"><option value="">すべての部署</option></select>
       <select class="input" id="revFiltCase"><option value="">すべての案件</option></select>
-      <input class="input" type="month" id="revFiltMonth">
+      <input class="input" type="month" id="revFiltMonth" style="max-width:180px">
       <button class="btn btn-ghost" id="revResetBtn">リセット</button>
     </div>
     <div class="table-wrapper">
@@ -104,8 +162,7 @@
           <th data-sort="deptName" data-table="rev">部署</th>
           <th data-sort="caseName" data-table="rev">案件名</th>
           <th data-sort="amount" data-table="rev">売上金額</th>
-          <th>備考</th>
-          <th>操作</th>
+          <th>備考</th><th>操作</th>
         </tr></thead>
         <tbody id="revTableBody"></tbody>
       </table>
@@ -124,7 +181,7 @@
         <option>人件費</option><option>外注費</option><option>材料費</option>
         <option>経費</option><option>その他</option>
       </select>
-      <input class="input" type="month" id="costFiltMonth">
+      <input class="input" type="month" id="costFiltMonth" style="max-width:180px">
       <button class="btn btn-ghost" id="costResetBtn">リセット</button>
     </div>
     <div class="table-wrapper">
@@ -135,8 +192,7 @@
           <th data-sort="caseName" data-table="cost">案件名</th>
           <th data-sort="category" data-table="cost">カテゴリ</th>
           <th data-sort="amount" data-table="cost">原価金額</th>
-          <th>備考</th>
-          <th>操作</th>
+          <th>備考</th><th>操作</th>
         </tr></thead>
         <tbody id="costTableBody"></tbody>
       </table>
@@ -159,19 +215,23 @@
       <table class="table table-pnl" id="pnlTable">
         <thead><tr>
           <th>部署 / 案件</th>
-          <th class="num">計画売上</th>
-          <th class="num">売上実績</th>
-          <th class="num">達成率</th>
-          <th class="num">計画原価</th>
-          <th class="num">原価実績</th>
-          <th class="num">粗利</th>
-          <th class="num">粗利率</th>
+          <th class="num">計画売上</th><th class="num">売上実績</th><th class="num">達成率</th>
+          <th class="num">計画原価</th><th class="num">原価実績</th>
+          <th class="num">粗利</th><th class="num">粗利率</th>
         </tr></thead>
         <tbody id="pnlTableBody"></tbody>
         <tfoot id="pnlTableFoot"></tfoot>
       </table>
       <div class="empty-state" id="pnlEmpty" hidden>データがありません</div>
     </div>
+  </section>
+
+  <!-- ===== TARGETS ===== -->
+  <section class="tab-content" id="tab-targets" hidden>
+    <div class="toolbar">
+      <select class="input" id="targetFiltYear" style="max-width:140px"></select>
+    </div>
+    <div id="targetContent"></div>
   </section>
 
   <!-- ===== DEPT ===== -->
@@ -189,6 +249,180 @@
 
 </main>
 
+<!-- ===== CUSTOMER MODAL ===== -->
+<div class="modal-overlay" id="custModalOverlay" hidden>
+  <div class="modal modal-sm" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <h2 class="modal-title" id="custModalTitle">顧客登録</h2>
+      <button class="modal-close" data-close="custModalOverlay">✕</button>
+    </div>
+    <form class="modal-body" id="custForm" novalidate>
+      <input type="hidden" id="custId">
+      <div class="form-grid">
+        <div class="field field-full">
+          <label class="label">顧客名 <span class="required">*</span></label>
+          <input class="input" type="text" id="custName" required maxlength="80">
+          <span class="error-msg" id="errCustName"></span>
+        </div>
+        <div class="field">
+          <label class="label">業種</label>
+          <select class="input" id="custIndustry">
+            <option value="">未選択</option>
+            <option>IT</option><option>製造</option><option>金融</option>
+            <option>流通</option><option>建設</option><option>サービス</option><option>その他</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="label">担当者名</label>
+          <input class="input" type="text" id="custContact" maxlength="40">
+        </div>
+        <div class="field">
+          <label class="label">電話番号</label>
+          <input class="input" type="tel" id="custTel" maxlength="20">
+        </div>
+        <div class="field">
+          <label class="label">メールアドレス</label>
+          <input class="input" type="email" id="custEmail" maxlength="80">
+        </div>
+        <div class="field field-full">
+          <label class="label">備考</label>
+          <textarea class="input textarea" id="custNote" rows="2" maxlength="300"></textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" data-close="custModalOverlay">キャンセル</button>
+        <button type="submit" class="btn btn-primary">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== PROSPECT MODAL ===== -->
+<div class="modal-overlay" id="prospModalOverlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <h2 class="modal-title" id="prospModalTitle">候補案件登録</h2>
+      <button class="modal-close" data-close="prospModalOverlay">✕</button>
+    </div>
+    <form class="modal-body" id="prospForm" novalidate>
+      <input type="hidden" id="prospId">
+      <div class="form-grid">
+        <div class="field">
+          <label class="label">顧客 <span class="required">*</span></label>
+          <select class="input" id="prospCust" required><option value="">選択してください</option></select>
+          <span class="error-msg" id="errProspCust"></span>
+        </div>
+        <div class="field">
+          <label class="label">部署</label>
+          <select class="input" id="prospDept"><option value="">未割当</option></select>
+        </div>
+        <div class="field field-full">
+          <label class="label">案件名 <span class="required">*</span></label>
+          <input class="input" type="text" id="prospName" required maxlength="100">
+          <span class="error-msg" id="errProspName"></span>
+        </div>
+        <div class="field">
+          <label class="label">ステージ <span class="required">*</span></label>
+          <select class="input" id="prospStage" required>
+            <option value="">選択</option>
+            <option>リード</option><option>提案</option><option>見積</option>
+            <option>交渉</option><option>クロージング</option>
+          </select>
+          <span class="error-msg" id="errProspStage"></span>
+        </div>
+        <div class="field">
+          <label class="label">成約確度（%）</label>
+          <input class="input" type="number" id="prospProb" min="0" max="100" step="5">
+        </div>
+        <div class="field">
+          <label class="label">概算金額（円）</label>
+          <input class="input" type="number" id="prospAmount" min="0" step="1">
+        </div>
+        <div class="field">
+          <label class="label">見込み原価（円）</label>
+          <input class="input" type="number" id="prospCost" min="0" step="1">
+        </div>
+        <div class="field">
+          <label class="label">担当者</label>
+          <input class="input" type="text" id="prospAssignee" maxlength="40">
+        </div>
+        <div class="field">
+          <label class="label">受注見込日</label>
+          <input class="input" type="date" id="prospDate">
+        </div>
+        <div class="field field-full">
+          <label class="label">備考</label>
+          <textarea class="input textarea" id="prospNote" rows="2" maxlength="300"></textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" data-close="prospModalOverlay">キャンセル</button>
+        <button type="submit" class="btn btn-primary">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== ORDER MODAL ===== -->
+<div class="modal-overlay" id="orderModalOverlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <h2 class="modal-title" id="orderModalTitle">受注登録</h2>
+      <button class="modal-close" data-close="orderModalOverlay">✕</button>
+    </div>
+    <form class="modal-body" id="orderForm" novalidate>
+      <input type="hidden" id="orderId">
+      <input type="hidden" id="orderProspectId">
+      <div class="form-grid">
+        <div class="field">
+          <label class="label">顧客 <span class="required">*</span></label>
+          <select class="input" id="orderCust" required><option value="">選択してください</option></select>
+          <span class="error-msg" id="errOrderCust"></span>
+        </div>
+        <div class="field">
+          <label class="label">部署</label>
+          <select class="input" id="orderDept"><option value="">未割当</option></select>
+        </div>
+        <div class="field field-full">
+          <label class="label">案件名 <span class="required">*</span></label>
+          <input class="input" type="text" id="orderName" required maxlength="100">
+          <span class="error-msg" id="errOrderName"></span>
+        </div>
+        <div class="field">
+          <label class="label">受注日 <span class="required">*</span></label>
+          <input class="input" type="date" id="orderDate" required>
+          <span class="error-msg" id="errOrderDate"></span>
+        </div>
+        <div class="field">
+          <label class="label">受注金額（円） <span class="required">*</span></label>
+          <input class="input" type="number" id="orderRevenue" min="0" step="1" required>
+          <span class="error-msg" id="errOrderRevenue"></span>
+        </div>
+        <div class="field">
+          <label class="label">見積原価（円）</label>
+          <input class="input" type="number" id="orderCostAmt" min="0" step="1">
+        </div>
+        <div class="field">
+          <label class="label">納期</label>
+          <input class="input" type="date" id="orderDelivery">
+        </div>
+        <div class="field">
+          <label class="label">担当者</label>
+          <input class="input" type="text" id="orderAssignee" maxlength="40">
+        </div>
+        <div class="field field-full">
+          <label class="label">備考</label>
+          <textarea class="input textarea" id="orderNote" rows="2" maxlength="300"></textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" data-close="orderModalOverlay">キャンセル</button>
+        <button type="submit" class="btn btn-primary">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- ===== CASE MODAL ===== -->
 <div class="modal-overlay" id="caseModalOverlay" hidden>
   <div class="modal" role="dialog" aria-modal="true">
@@ -198,31 +432,32 @@
     </div>
     <form class="modal-body" id="caseForm" novalidate>
       <input type="hidden" id="caseId">
+      <input type="hidden" id="caseOrderId">
       <div class="form-grid">
         <div class="field field-full">
-          <label class="label" for="caseName">案件名 <span class="required">*</span></label>
+          <label class="label">案件名 <span class="required">*</span></label>
           <input class="input" type="text" id="caseName" required maxlength="100">
           <span class="error-msg" id="errCaseName"></span>
         </div>
         <div class="field">
-          <label class="label" for="caseClient">顧客名 <span class="required">*</span></label>
+          <label class="label">顧客名 <span class="required">*</span></label>
           <input class="input" type="text" id="caseClient" required maxlength="80">
           <span class="error-msg" id="errCaseClient"></span>
         </div>
         <div class="field">
-          <label class="label" for="caseDept">部署</label>
+          <label class="label">部署</label>
           <select class="input" id="caseDept"><option value="">未割当</option></select>
         </div>
         <div class="field">
-          <label class="label" for="caseRevenue">計画売上（円）</label>
+          <label class="label">計画売上（円）</label>
           <input class="input" type="number" id="caseRevenue" min="0" step="1">
         </div>
         <div class="field">
-          <label class="label" for="casePlannedCost">計画原価（円）</label>
+          <label class="label">計画原価（円）</label>
           <input class="input" type="number" id="casePlannedCost" min="0" step="1">
         </div>
         <div class="field">
-          <label class="label" for="caseStatus">ステータス <span class="required">*</span></label>
+          <label class="label">ステータス <span class="required">*</span></label>
           <select class="input" id="caseStatus" required>
             <option value="">選択</option>
             <option>新規</option><option>進行中</option><option>商談中</option>
@@ -231,21 +466,21 @@
           <span class="error-msg" id="errCaseStatus"></span>
         </div>
         <div class="field">
-          <label class="label" for="casePriority">優先度</label>
+          <label class="label">優先度</label>
           <select class="input" id="casePriority">
             <option>高</option><option selected>中</option><option>低</option>
           </select>
         </div>
         <div class="field">
-          <label class="label" for="caseAssignee">担当者</label>
+          <label class="label">担当者</label>
           <input class="input" type="text" id="caseAssignee" maxlength="40">
         </div>
         <div class="field">
-          <label class="label" for="caseDue">期日</label>
+          <label class="label">期日</label>
           <input class="input" type="date" id="caseDue">
         </div>
         <div class="field field-full">
-          <label class="label" for="caseNote">備考</label>
+          <label class="label">備考</label>
           <textarea class="input textarea" id="caseNote" rows="2" maxlength="500"></textarea>
         </div>
       </div>
@@ -267,24 +502,24 @@
     <form class="modal-body" id="revForm" novalidate>
       <input type="hidden" id="revId">
       <div class="field" style="margin-bottom:14px">
-        <label class="label" for="revCase">案件 <span class="required">*</span></label>
+        <label class="label">案件 <span class="required">*</span></label>
         <select class="input" id="revCase" required><option value="">選択してください</option></select>
         <span class="error-msg" id="errRevCase"></span>
       </div>
       <div class="form-grid form-grid-2">
         <div class="field">
-          <label class="label" for="revDate">日付 <span class="required">*</span></label>
+          <label class="label">日付 <span class="required">*</span></label>
           <input class="input" type="date" id="revDate" required>
           <span class="error-msg" id="errRevDate"></span>
         </div>
         <div class="field">
-          <label class="label" for="revAmount">金額（円） <span class="required">*</span></label>
-          <input class="input" type="number" id="revAmount" min="0" step="1" required>
+          <label class="label">金額（円） <span class="required">*</span></label>
+          <input class="input" type="number" id="revAmount" min="0" required>
           <span class="error-msg" id="errRevAmount"></span>
         </div>
       </div>
       <div class="field" style="margin-top:14px">
-        <label class="label" for="revNote">備考</label>
+        <label class="label">備考</label>
         <textarea class="input textarea" id="revNote" rows="2" maxlength="300"></textarea>
       </div>
       <div class="modal-actions" style="margin-top:20px">
@@ -305,13 +540,13 @@
     <form class="modal-body" id="costForm" novalidate>
       <input type="hidden" id="costId">
       <div class="field" style="margin-bottom:14px">
-        <label class="label" for="costCase">案件 <span class="required">*</span></label>
+        <label class="label">案件 <span class="required">*</span></label>
         <select class="input" id="costCase" required><option value="">選択してください</option></select>
         <span class="error-msg" id="errCostCase"></span>
       </div>
       <div class="form-grid form-grid-3">
         <div class="field">
-          <label class="label" for="costCat">カテゴリ <span class="required">*</span></label>
+          <label class="label">カテゴリ <span class="required">*</span></label>
           <select class="input" id="costCat" required>
             <option value="">選択</option>
             <option>人件費</option><option>外注費</option><option>材料費</option>
@@ -320,22 +555,63 @@
           <span class="error-msg" id="errCostCat"></span>
         </div>
         <div class="field">
-          <label class="label" for="costDate">日付 <span class="required">*</span></label>
+          <label class="label">日付 <span class="required">*</span></label>
           <input class="input" type="date" id="costDate" required>
           <span class="error-msg" id="errCostDate"></span>
         </div>
         <div class="field">
-          <label class="label" for="costAmount">金額（円） <span class="required">*</span></label>
-          <input class="input" type="number" id="costAmount" min="0" step="1" required>
+          <label class="label">金額（円） <span class="required">*</span></label>
+          <input class="input" type="number" id="costAmount" min="0" required>
           <span class="error-msg" id="errCostAmount"></span>
         </div>
       </div>
       <div class="field" style="margin-top:14px">
-        <label class="label" for="costNote">備考</label>
+        <label class="label">備考</label>
         <textarea class="input textarea" id="costNote" rows="2" maxlength="300"></textarea>
       </div>
       <div class="modal-actions" style="margin-top:20px">
         <button type="button" class="btn btn-ghost" data-close="costModalOverlay">キャンセル</button>
+        <button type="submit" class="btn btn-primary">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== TARGET MODAL ===== -->
+<div class="modal-overlay" id="targetModalOverlay" hidden>
+  <div class="modal modal-sm" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <h2 class="modal-title" id="targetModalTitle">目標設定</h2>
+      <button class="modal-close" data-close="targetModalOverlay">✕</button>
+    </div>
+    <form class="modal-body" id="targetForm" novalidate>
+      <input type="hidden" id="targetId">
+      <div class="form-grid form-grid-2" style="margin-bottom:14px">
+        <div class="field">
+          <label class="label">年度 <span class="required">*</span></label>
+          <select class="input" id="targetYear" required></select>
+          <span class="error-msg" id="errTargetYear"></span>
+        </div>
+        <div class="field">
+          <label class="label">部署 <span class="required">*</span></label>
+          <select class="input" id="targetDept" required>
+            <option value="0">全社</option>
+          </select>
+          <span class="error-msg" id="errTargetDept"></span>
+        </div>
+      </div>
+      <div class="form-grid form-grid-2">
+        <div class="field">
+          <label class="label">受注高目標（円）</label>
+          <input class="input" type="number" id="targetOrderAmt" min="0" step="10000">
+        </div>
+        <div class="field">
+          <label class="label">売上目標（円）</label>
+          <input class="input" type="number" id="targetRevAmt" min="0" step="10000">
+        </div>
+      </div>
+      <div class="modal-actions" style="margin-top:20px">
+        <button type="button" class="btn btn-ghost" data-close="targetModalOverlay">キャンセル</button>
         <button type="submit" class="btn btn-primary">保存</button>
       </div>
     </form>
@@ -352,16 +628,16 @@
     <form class="modal-body" id="deptForm" novalidate>
       <input type="hidden" id="deptId">
       <div class="field" style="margin-bottom:14px">
-        <label class="label" for="deptName">部署名 <span class="required">*</span></label>
+        <label class="label">部署名 <span class="required">*</span></label>
         <input class="input" type="text" id="deptName" required maxlength="40">
         <span class="error-msg" id="errDeptName"></span>
       </div>
       <div class="field" style="margin-bottom:14px">
-        <label class="label" for="deptManager">部署長</label>
+        <label class="label">部署長</label>
         <input class="input" type="text" id="deptManager" maxlength="40">
       </div>
       <div class="field" style="margin-bottom:20px">
-        <label class="label" for="deptNote">備考</label>
+        <label class="label">備考</label>
         <textarea class="input textarea" id="deptNote" rows="2" maxlength="200"></textarea>
       </div>
       <div class="modal-actions">
