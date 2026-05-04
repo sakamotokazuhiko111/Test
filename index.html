@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>案件管理システム</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <h1 class="header-title">案件管理システム</h1>
+      <button class="btn btn-primary" id="btnAdd">＋ 新規案件</button>
+    </div>
+  </header>
+
+  <main class="main">
+    <!-- KPI cards -->
+    <div class="kpi-grid" id="kpiGrid"></div>
+
+    <!-- Filter / Search bar -->
+    <div class="toolbar">
+      <input class="input search-input" type="text" id="searchInput" placeholder="案件名・顧客名で検索…">
+      <select class="input" id="filterStatus">
+        <option value="">すべてのステータス</option>
+        <option value="新規">新規</option>
+        <option value="進行中">進行中</option>
+        <option value="商談中">商談中</option>
+        <option value="完了">完了</option>
+        <option value="保留">保留</option>
+        <option value="失注">失注</option>
+      </select>
+      <select class="input" id="filterPriority">
+        <option value="">すべての優先度</option>
+        <option value="高">高</option>
+        <option value="中">中</option>
+        <option value="低">低</option>
+      </select>
+      <button class="btn btn-ghost" id="btnReset">リセット</button>
+    </div>
+
+    <!-- Case table -->
+    <div class="table-wrapper">
+      <table class="table" id="caseTable">
+        <thead>
+          <tr>
+            <th data-sort="id">No.</th>
+            <th data-sort="name">案件名</th>
+            <th data-sort="client">顧客名</th>
+            <th data-sort="amount">金額</th>
+            <th data-sort="status">ステータス</th>
+            <th data-sort="priority">優先度</th>
+            <th data-sort="assignee">担当者</th>
+            <th data-sort="dueDate">期日</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="caseTableBody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" hidden>
+        <p>案件が見つかりません</p>
+      </div>
+    </div>
+
+    <div class="table-footer" id="tableFooter"></div>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modalOverlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">案件登録</h2>
+        <button class="modal-close" id="btnModalClose" aria-label="閉じる">✕</button>
+      </div>
+      <form class="modal-body" id="caseForm" novalidate>
+        <input type="hidden" id="fieldId">
+
+        <div class="form-grid">
+          <div class="field field-full">
+            <label class="label" for="fieldName">案件名 <span class="required">*</span></label>
+            <input class="input" type="text" id="fieldName" required maxlength="100">
+            <span class="error-msg" id="errName"></span>
+          </div>
+
+          <div class="field">
+            <label class="label" for="fieldClient">顧客名 <span class="required">*</span></label>
+            <input class="input" type="text" id="fieldClient" required maxlength="80">
+            <span class="error-msg" id="errClient"></span>
+          </div>
+
+          <div class="field">
+            <label class="label" for="fieldAmount">金額（円）</label>
+            <input class="input" type="number" id="fieldAmount" min="0" step="1">
+          </div>
+
+          <div class="field">
+            <label class="label" for="fieldStatus">ステータス <span class="required">*</span></label>
+            <select class="input" id="fieldStatus" required>
+              <option value="">選択してください</option>
+              <option value="新規">新規</option>
+              <option value="進行中">進行中</option>
+              <option value="商談中">商談中</option>
+              <option value="完了">完了</option>
+              <option value="保留">保留</option>
+              <option value="失注">失注</option>
+            </select>
+            <span class="error-msg" id="errStatus"></span>
+          </div>
+
+          <div class="field">
+            <label class="label" for="fieldPriority">優先度</label>
+            <select class="input" id="fieldPriority">
+              <option value="中">中</option>
+              <option value="高">高</option>
+              <option value="低">低</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label class="label" for="fieldAssignee">担当者</label>
+            <input class="input" type="text" id="fieldAssignee" maxlength="40">
+          </div>
+
+          <div class="field">
+            <label class="label" for="fieldDueDate">期日</label>
+            <input class="input" type="date" id="fieldDueDate">
+          </div>
+
+          <div class="field field-full">
+            <label class="label" for="fieldNote">備考</label>
+            <textarea class="input textarea" id="fieldNote" rows="3" maxlength="500"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" id="btnCancel">キャンセル</button>
+          <button type="submit" class="btn btn-primary" id="btnSave">保存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Confirm dialog -->
+  <div class="modal-overlay" id="confirmOverlay" hidden>
+    <div class="modal modal-sm" role="alertdialog" aria-modal="true">
+      <div class="modal-header">
+        <h2 class="modal-title">削除の確認</h2>
+      </div>
+      <div class="modal-body">
+        <p id="confirmMsg">この案件を削除してもよろしいですか？</p>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="btnConfirmCancel">キャンセル</button>
+          <button class="btn btn-danger" id="btnConfirmOk">削除する</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
